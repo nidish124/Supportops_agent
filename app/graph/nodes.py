@@ -40,7 +40,7 @@ class IntentClassifierNode:
 
 
     def classify(self, triage_request: triageRequest) -> Dict[str, Any]:
-        metadata_var = triage_request.metadata.model_dump() if triage_request.metadata else {}
+        metadata_var = triage_request.metadata.model_dump(mode='json') if triage_request.metadata else {}
         prompt = self.template.format(text = triage_request.message, metadata = json.dumps(metadata_var))
 
         raw = self.llm.predict(prompt)

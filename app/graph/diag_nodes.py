@@ -73,6 +73,7 @@ class DecisionNode:
             safety["audit_hint"] = "create_ticket_requires_audit_record"
         
         # Rule 2: missing subscription -> collect info
+
         elif not subscription:
             recommended_action = {
                 "type": "collect_account_info",
