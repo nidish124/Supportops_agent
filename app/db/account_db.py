@@ -64,7 +64,7 @@ class AccountDB:
         user_id: str
         """
         cur = self._conn.cursor()
-        cur.execute("SELECT * FROM accounts WHERE user_id = ?", (user_id))
+        cur.execute("SELECT * FROM accounts WHERE user_id = ?", (user_id,))
         raw = cur.fetchone()
         if raw is None:
             return None

@@ -9,14 +9,14 @@ Deterministic rules:
 """
 
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 
 class ProductDiagSimulator:
     def __init__(self):
         pass
 
     def run_diagnostic(self, user_id: str, product_version: str) -> Dict[str, Any]:
-        now = datetime.utcnow().isoformat() + "Z"
+        now = datetime.now(UTC).isoformat()
         pv = (product_version or "").lower()
 
         if "1.6" in pv:
@@ -24,7 +24,7 @@ class ProductDiagSimulator:
                 "timestamp": now,
                 "payment_gateway_status": "timeout",
                 "service_health": "degraded",
-                "error_code": ["PAY_GATEWAY_TIMEOUT"],
+                "error_codes": ["PAY_GATEWAY_TIMEOUT"],
                 "error_message": "Simulated payment gateway timeout for product version 1.6"
             }
         
@@ -33,7 +33,7 @@ class ProductDiagSimulator:
                 "timestamp": now,
                 "payment_gateway_status": "slow",
                 "service_health": "degraded",
-                "error_code": ["SERVICE_HIGH_LATENCY"],
+                "error_codes": ["SERVICE_HIGH_LATENCY"],
                 "error_message": "Simulated degraded performance for beta builds"
             }
         
@@ -41,6 +41,6 @@ class ProductDiagSimulator:
             "timestamp": now,
             "payment_gateway_status": "ok",
             "service_health": "healthy",
-            "error_code": [],
+            "error_codes": [],
             "error_message": "All checks passed"
         }
