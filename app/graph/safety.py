@@ -52,8 +52,7 @@ class SafetyGateNode:
             status = 'allowed'
             audit_id = self.audit_db.insert_audit(request_id, user_id, action_type, payload, executor_id, status, None)
             token = self._make_audit_token(audit_id)
-
-            self.audit_db.update_status(audit_id, status, token)
+            self.audit_db.update_status(audit_id ,status,token )
             return {
                 "action_allowed": True,
                 "required_approvals": [],
@@ -68,7 +67,7 @@ class SafetyGateNode:
                 audit_id = self.audit_db.insert_audit(request_id, user_id, action_type, payload, executor_id, status, None)
                 token = self._make_audit_token(audit_id)
 
-                self.audit_db.update_status(audit_id, status, token)
+                self.audit_db.update_status( audit_id, status, token)
                 return {
                     "action_allowed": True,
                     "required_approvals": [],
