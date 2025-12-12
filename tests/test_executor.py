@@ -22,7 +22,7 @@ def test_executor_executes_create_ticket_and_updates_audit():
     audit_id = safety["audit_id"]
 
     # ticket_tool = Tickettool("demo-repo")
-    executor = ActionExecutorNode(db)
+    executor = ActionExecutorNode(db, Tickettool("support_agent"))
     res = executor.execute(REQUEST_ID, USER_ID, recommended_action, safety, 'system_bot')
     print(res)
     assert res["executed"] is True
