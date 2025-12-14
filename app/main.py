@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 import logging 
 from app.schemas import triageRequest
 from app.graph.flow import TriageFlow
+from app.graph.langgraph_flow import LangGraphTriage
 
 app = FastAPI(title="supportops agent", version="0.1.0")
 
@@ -27,8 +28,8 @@ def triage(payload: triageRequest):
 
     try:
         payload_dict = payload.model_dump()
-        flow  = TriageFlow()
-        result = flow.run(payload_dict)
+        flow  = LangGraphTriage(db_path="accounts.db")
+        result = flow.invoke(payload_dict)
         flow.close()
         logger.info("Triage completed: request_id=%s user_id=%s decision=%s", result.get("request_id"), result.get("user_id"), result.get("decision", {}).get("recommended_action", {}).get("type"))
         return JSONResponse(status_code=200, content=result)

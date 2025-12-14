@@ -94,9 +94,9 @@ def test_executor_github_issue_create():
     # We assume safety allows it (mocking safety or just relying on logic)
     # Re-using the logic from other tests, we need a safety result.
     safety = gate.evaluate("req-real-1", "user-real-1", recommended_action, executor_id="system_bot", confirm=False)
-    
+    print("safety:", safety)
     res = executor.execute("req-real-1", "user-real-1", recommended_action, safety, executor_id="system_bot")
-
+    print("executor:", res)
     assert res["executed"] is True
     assert res["external_response"] is not None
     assert "ticket_url" in res["external_response"]

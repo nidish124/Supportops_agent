@@ -53,6 +53,7 @@ class ActionExecutorNode:
             except Exception as exc:
                 self.audit_db.update_status(audit_id, "rejected")
                 audit_row = self.audit_db.get_audit(audit_id)
+                print("***************ticket created", exc)
                 return {
                     "executed": False,
                     "reason": f"external_failure: {str(exc)}",
@@ -62,7 +63,7 @@ class ActionExecutorNode:
 
             self.audit_db.update_status(audit_id, "executed")
             audit_row = self.audit_db.get_audit(audit_id)
-
+            print("ticket created******************")
             return {
                 "executed": True,
                 "reason": "ok",

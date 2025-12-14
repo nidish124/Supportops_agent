@@ -36,7 +36,7 @@ class GitHubTicketTool:
     def create_issue(self, title: str, body: str, lables: List[str] = None) -> Dict[str, Any]:
         lables = lables or []
         try:
-            gh_lables = [self.repo.create_issue(l, "ffffff") if not self._label_exists(l) else self.repo.get_lable(l) for l in lables]
+            gh_lables = [self.repo.create_issue(l, "ffffff") if not self._label_exists(l) else self.repo.get_label(l) for l in lables]
         except GithubException:
             gh_labels = lables
 
