@@ -47,13 +47,13 @@ class TriageState(TypedDict, total=False):
     execution: Dict[str, Any]
 
 class LangGraphTriage:
-    def __init__(self, db_path: str = ":memory:", github_token : Optional[str] = None, github_repo: Optional[str]= None,
+    def __init__(self, db_path: str = None, github_token : Optional[str] = None, github_repo: Optional[str]= None,
     classifier_llm: Optional[Any] = None, synthesis_llm: Optional[Any] = None):
         github_token = github_token or os.getenv("GITHUB_TOKEN")
         github_repo = github_repo or os.getenv("GITHUB_REPO")
 
-        self.account_db = AccountDB(db_path)
-        self.audit_db = AuditDB(db_path)
+        self.account_db = AccountDB(path=os.getenv("DB_PATH_ACCOUNT"))
+        self.audit_db = AuditDB(path=os.getenv("DB_PATH_AUDIT"))
 
         self.account_tool = AccountTool(self.account_db)
         self.diag_tool = ProductDiagTool(ProductDiagSimulator())

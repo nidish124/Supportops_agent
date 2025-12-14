@@ -19,10 +19,13 @@ import json
 from datetime import datetime
 from typing import Optional, Dict, Any
 from datetime import datetime, UTC
+import os
+
+db_path = os.getenv("DB_PATH", "/tmp/supportops_audit.db")
 
 class AuditDB:
-    def __init__(self, path: str = ":memory:"):
-        self.path = path
+    def __init__(self, path: str = None):
+        self.path = path or db_path
         self._conn = sqlite3.connect(self.path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._ensure_table()

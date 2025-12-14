@@ -16,10 +16,13 @@ Schema (accounts):
 import sqlite3
 from typing import Dict, Optional
 import json
+import os
+
+db_path = os.getenv("DB_PATH", "/tmp/supportops_account.db")
 
 class AccountDB:
-    def __init__(self, path: str):
-        self.path = path
+    def __init__(self, path: str=None):
+        self.path = path or os.db_path
         self._conn = sqlite3.connect(self.path, check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._ensure_tables()
