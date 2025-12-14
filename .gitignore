@@ -7,7 +7,6 @@ tt.ipynb
 *.so
 debug_paths.py
 *.ipynb
-requirements.txt
 
 # Distribution / packaging
 .Python
