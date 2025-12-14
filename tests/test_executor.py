@@ -1,5 +1,5 @@
 import pytest
-from app.db.audit import AuditDB
+from app.db.audit_mongo import MongoAuditDB
 from app.graph.safety import SafetyGateNode
 from app.graph.executor import ActionExecutorNode
 from app.tools.ticket_tool import Tickettool
@@ -8,7 +8,7 @@ REQUEST_ID = "req-exec-1"
 USER_ID = "user-exec-1"
 
 def test_executor_executes_create_ticket_and_updates_audit():
-    db = AuditDB(":memory:")
+    db = MongoAuditDB()
     gate = SafetyGateNode(db, "test-secret")
     recommended_action = {
         "type": "create_ticket",
@@ -24,7 +24,6 @@ def test_executor_executes_create_ticket_and_updates_audit():
     # ticket_tool = Tickettool("demo-repo")
     executor = ActionExecutorNode(db, Tickettool("support_agent"))
     res = executor.execute(REQUEST_ID, USER_ID, recommended_action, safety, 'system_bot')
-    print(res)
     assert res["executed"] is True
     assert res["external_response"] is not None
     assert "ticket_url" in res["external_response"]
@@ -36,7 +35,7 @@ def test_executor_executes_create_ticket_and_updates_audit():
 
 
 def test_executor_blocks_when_safety_denies_execution():
-    audit_db = AuditDB(":memory:")
+    audit_db = MongoAuditDB()
     gate = SafetyGateNode(audit_db, "test-secret")
     
     destructive_action = {

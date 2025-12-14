@@ -5,6 +5,8 @@ __pycache__/
 tt.ipynb
 # C extensions
 *.so
+debug_paths.py
+*.ipynb
 
 # Distribution / packaging
 .Python

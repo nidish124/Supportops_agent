@@ -5,6 +5,11 @@ import logging
 from app.schemas import triageRequest
 from app.graph.flow import TriageFlow
 from app.graph.langgraph_flow import LangGraphTriage
+from app.utils import get_db_path
+
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 app = FastAPI(title="supportops agent", version="0.1.0")
 
@@ -28,7 +33,7 @@ def triage(payload: triageRequest):
 
     try:
         payload_dict = payload.model_dump()
-        flow  = LangGraphTriage(db_path="accounts.db")
+        flow  = LangGraphTriage(db_path=get_db_path("supportops_account.db", "DB_PATH_ACCOUNT"))
         result = flow.invoke(payload_dict)
         flow.close()
         logger.info("Triage completed: request_id=%s user_id=%s decision=%s", result.get("request_id"), result.get("user_id"), result.get("decision", {}).get("recommended_action", {}).get("type"))

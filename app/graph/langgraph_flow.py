@@ -20,8 +20,8 @@ from app.graph.nodes import ParseInputNode, IntentClassifierNode
 from app.graph.diag_nodes import DiagnosticsOrchestratorNode, DecisionNode
 from app.tools.diag_tools import AccountTool, ProductDiagTool, CombinedDiagnosticsTool
 from app.simulator.diag_simulator import ProductDiagSimulator
-from app.db.account_db import AccountDB
-from app.db.audit import AuditDB
+from app.db.account_mongo import MongoAccountDB
+from app.db.audit_mongo import MongoAuditDB
 from app.tools.ticket_tool import Tickettool
 from app.tools.github_ticket_tool import GitHubTicketTool  # may raise if token missing
 from app.tools.ticket_tool import Tickettool as LocalTicketTool
@@ -36,6 +36,9 @@ from app.graph.safety import SafetyGateNode
 
 from langgraph.graph import StateGraph
 from langgraph.constants import START, END
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class TriageState(TypedDict, total=False):
     payload: Dict[str, Any]
@@ -52,8 +55,8 @@ class LangGraphTriage:
         github_token = github_token or os.getenv("GITHUB_TOKEN")
         github_repo = github_repo or os.getenv("GITHUB_REPO")
 
-        self.account_db = AccountDB(path=os.getenv("DB_PATH_ACCOUNT"))
-        self.audit_db = AuditDB(path=os.getenv("DB_PATH_AUDIT"))
+        self.account_db = MongoAccountDB()
+        self.audit_db = MongoAuditDB()
 
         self.account_tool = AccountTool(self.account_db)
         self.diag_tool = ProductDiagTool(ProductDiagSimulator())

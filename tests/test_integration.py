@@ -1,12 +1,15 @@
 from fastapi.testclient import TestClient
 from app.main import app
 import json
+from unittest.mock import patch
+import mongomock
 
 from app.graph.diag_nodes import DiagnosticsOrchestratorNode, DecisionNode
-from app.db.account_db import AccountDB
+from app.db.account_mongo import MongoAccountDB
 from app.simulator.diag_simulator import ProductDiagSimulator
 from app.tools.diag_tools import AccountTool, ProductDiagTool, CombinedDiagnosticsTool
 from app.llm.mock_llm import Mockllm
+import os
 
 VALID_PAYLOAD = {
     "request_id": "req-int-1",
@@ -46,11 +49,23 @@ def test_trige_endpoint_returns_decision_and_expected_keys():
     assert decision["recommended_action"]["type"] == "create_ticket"
     assert decision["severity"] == "high"
 
-def test_trige_endpoint_healthy_suggests_runbook():
+@patch('app.db.account_mongo.mongomock.MongoClient')
+def test_trige_endpoint_healthy_suggests_runbook(mock_mongo_cls):
+    # Create a shared mock client for this test
+    shared_client = mongomock.MongoClient()
+    mock_mongo_cls.return_value = shared_client
 
-    # user_id is already seeded in accounts.db via seed_db.py
-    # user_id = HEALTHY_PAYLOAD["user_id"] # Matches seeded data
-
+    # Seed the database using the shared client
+    # The app will also use this shared client when it instantiates MongoAccountDB
+    seed_db = MongoAccountDB()
+    seed_db.upsert_account({
+        "user_id": HEALTHY_PAYLOAD["user_id"],
+        "subscription": "active",
+        "last_payment_attempt": "2025-12-10",
+        "metadata": {}
+    })
+    
+    # Run the request
     r = client.post("/support/triage", json=HEALTHY_PAYLOAD)
 
     assert r.status_code == 200

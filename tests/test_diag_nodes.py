@@ -1,12 +1,12 @@
 import pytest
 from app.graph.diag_nodes import DiagnosticsOrchestratorNode, DecisionNode
-from app.db.account_db import AccountDB
+from app.db.account_mongo import MongoAccountDB
 from app.simulator.diag_simulator import ProductDiagSimulator
 from app.tools.diag_tools import AccountTool, ProductDiagTool, CombinedDiagnosticsTool
 from app.llm.mock_llm import Mockllm
 
 def make_combined_tool_with_account(user_id: str, subscription: str = "active", product_version: str = "1.6.2"):
-    db = AccountDB(":memory:")
+    db = MongoAccountDB()
     db.upsert_account(
         {"user_id" : user_id,
         "subscription": subscription,

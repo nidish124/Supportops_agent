@@ -20,8 +20,11 @@ from datetime import datetime
 from typing import Optional, Dict, Any
 from datetime import datetime, UTC
 import os
+from ..utils import get_db_path
 
-db_path = os.getenv("DB_PATH", "/tmp/supportops_audit.db")
+#db_path = os.getenv("DB_PATH_AUDIT", "/tmp/supportops_audit.db")
+
+db_path = get_db_path("supportops_audit.db", "DB_PATH_AUDIT")
 
 class AuditDB:
     def __init__(self, path: str = None):

@@ -11,13 +11,13 @@ Behavior:
 """
 
 from typing import Dict, Any
-from app.db.audit import AuditDB
+from app.db.audit_mongo import MongoAuditDB
 from app.tools.github_ticket_tool import GitHubTicketTool
 from app.tools.ticket_tool import Tickettool
 
 class ActionExecutorNode:
-    def __init__(self,  audit_db: AuditDB, ticket_tool: GitHubTicketTool = None):
-        self.audit_db = audit_db or AuditDB(":memory:")
+    def __init__(self,  audit_db= None, ticket_tool: GitHubTicketTool = None):
+        self.audit_db = audit_db or MongoAuditDB()
         self.tickettool = ticket_tool or GitHubTicketTool()
     
     def execute(self, request_id: str, user_id: str, recommended_action: Dict[str, Any], 
@@ -53,7 +53,6 @@ class ActionExecutorNode:
             except Exception as exc:
                 self.audit_db.update_status(audit_id, "rejected")
                 audit_row = self.audit_db.get_audit(audit_id)
-                print("***************ticket created", exc)
                 return {
                     "executed": False,
                     "reason": f"external_failure: {str(exc)}",
@@ -63,7 +62,6 @@ class ActionExecutorNode:
 
             self.audit_db.update_status(audit_id, "executed")
             audit_row = self.audit_db.get_audit(audit_id)
-            print("ticket created******************")
             return {
                 "executed": True,
                 "reason": "ok",

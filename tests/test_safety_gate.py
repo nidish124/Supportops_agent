@@ -1,12 +1,12 @@
 import pytest
 from app.graph.safety import SafetyGateNode
-from app.db.audit import AuditDB
+from app.db.audit_mongo import MongoAuditDB
 
 request_id = "req-safety-1"
 user_id = "user-safety-1"
 
 def test_create_ticket_is_allowed_and_audited():
-    db = AuditDB(":memory:")
+    db = MongoAuditDB()
     gate = SafetyGateNode(db, "test-secrets")
     recommended_action = {
             "type": "create_ticket",
@@ -26,7 +26,7 @@ def test_create_ticket_is_allowed_and_audited():
 
 
 def test_destructive_action_requires_approval_and_blocks_then_allows_with_confirm():
-    db = AuditDB(":memory:")
+    db = MongoAuditDB()
     gate = SafetyGateNode(db, "test-secrets", ["human_approver"])
     recommended_action = {
             "type": "reset_credentials",

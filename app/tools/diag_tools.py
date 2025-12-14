@@ -7,11 +7,11 @@ Tools that wrap AccountDB and ProductDiagSimulator.
 """
 
 from typing import Dict, Any
-from app.db.account_db import AccountDB
+from app.db.account_mongo import MongoAccountDB
 from app.simulator.diag_simulator import ProductDiagSimulator
 
 class AccountTool:
-    def __init__(self, account_db: AccountDB):
+    def __init__(self, account_db: MongoAccountDB):
         self.account_db = account_db
 
     def fetch_account(self, user_id: str) -> Dict[str, Any]:

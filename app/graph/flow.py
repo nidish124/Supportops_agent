@@ -11,11 +11,11 @@ from app.graph.nodes import ParseInputNode, IntentClassifierNode
 from app.graph.diag_nodes import DiagnosticsOrchestratorNode, DecisionNode
 from app.tools.diag_tools import AccountTool, ProductDiagTool, CombinedDiagnosticsTool
 from app.simulator.diag_simulator import ProductDiagSimulator
-from app.db.account_db import AccountDB
+from app.db.account_mongo import MongoAccountDB
 
 class TriageFlow:
-    def __init__(self, db_path: str = "accounts.db"):
-        self.db = AccountDB(db_path)
+    def __init__(self):
+        self.db = MongoAccountDB()
         #tools
         self.acc_tool = AccountTool(self.db)
         self.diag_tool = ProductDiagTool(ProductDiagSimulator())

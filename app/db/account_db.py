@@ -17,8 +17,10 @@ import sqlite3
 from typing import Dict, Optional
 import json
 import os
+from app.utils import get_db_path
 
-db_path = os.getenv("DB_PATH", "/tmp/supportops_account.db")
+db_path = os.getenv("DB_PATH_ACCOUNT", "/tmp/supportops_account.db")
+db_path = get_db_path("supportops_account.db", "DB_PATH_ACCOUNT")
 
 class AccountDB:
     def __init__(self, path: str=None):

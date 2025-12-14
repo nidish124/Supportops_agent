@@ -1,11 +1,11 @@
 import pytest
-from app.db.account_db import AccountDB
+from app.db.account_mongo import MongoAccountDB
 from app.simulator.diag_simulator import ProductDiagSimulator
 from app.tools.diag_tools import CombinedDiagnosticsTool, AccountTool, ProductDiagTool
 from datetime import datetime
 
 def test_account_db_upsert_and_get():
-    db = AccountDB(':memory:')
+    db = MongoAccountDB()
     user_id = "abc"
     account = {
         "user_id": user_id,
@@ -37,7 +37,7 @@ def test_product_diag_simulator_rules():
     assert "SERVICE_HIGH_LATENCY" in r3["error_codes"]
 
 def test_diag_tools_combined():
-    db = AccountDB(":memory:")
+    db = MongoAccountDB()
     user_id = "acct-1"
     db.upsert_account({
         "user_id": user_id,

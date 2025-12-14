@@ -15,11 +15,11 @@ import hmac
 import hashlib
 from typing import Dict, Any, List, Optional
 
-from app.db.audit import AuditDB
+from app.db.audit_mongo import MongoAuditDB
 
 class SafetyGateNode:
-    def __init__(self, audit_db: Optional[AuditDB], secret : str = 'dev-secret', authorized_approvers: Optional[List[str]] = None):
-        self.audit_db = audit_db or AuditDB(":memory:")
+    def __init__(self, audit_db = None, secret : str = 'dev-secret', authorized_approvers: Optional[List[str]] = None):
+        self.audit_db = audit_db or MongoAuditDB()
         self.secret = secret
         self.authorized_approvers = authorized_approvers or ["human_approver"]
 
@@ -50,7 +50,8 @@ class SafetyGateNode:
 
         if action_type in self.non_destructive:
             status = 'allowed'
-            audit_id = self.audit_db.insert_audit(request_id, user_id, action_type, payload, executor_id, status, None)
+            audit_doc = self.audit_db.create_audit(request_id, user_id, action_type, payload, executor_id, status, None)
+            audit_id = audit_doc["id"]
             token = self._make_audit_token(audit_id)
             self.audit_db.update_status(audit_id ,status,token )
             return {
@@ -64,7 +65,8 @@ class SafetyGateNode:
         if action_type in self.destructive:
             if confirm and executor_id in self.authorized_approvers:
                 status = 'allowed'
-                audit_id = self.audit_db.insert_audit(request_id, user_id, action_type, payload, executor_id, status, None)
+                audit_doc = self.audit_db.create_audit(request_id, user_id, action_type, payload, executor_id, status, None)
+                audit_id = audit_doc["id"]
                 token = self._make_audit_token(audit_id)
 
                 self.audit_db.update_status( audit_id, status, token)
@@ -76,7 +78,8 @@ class SafetyGateNode:
                     "status": status
                 }
             status = "requires_approval"
-            audit_id = self.audit_db.insert_audit(request_id, user_id, action_type, payload, executor_id, status, None)
+            audit_doc = self.audit_db.create_audit(request_id, user_id, action_type, payload, executor_id, status, None)
+            audit_id = audit_doc["id"]
             return {
                 "action_allowed": False,
                 "required_approvals": ["human_support_agent"],
@@ -86,7 +89,8 @@ class SafetyGateNode:
             }
 
         status = "requires_approval"
-        audit_id = self.audit_db.insert_audit(request_id, user_id, action_type or "unknown", payload, executor_id, status, None)
+        audit_doc = self.audit_db.create_audit(request_id, user_id, action_type or "unknown", payload, executor_id, status, None)
+        audit_id = audit_doc["id"]
         return {
             "action_allowed": False,
             "required_approvals": ["human_support_agent"],
