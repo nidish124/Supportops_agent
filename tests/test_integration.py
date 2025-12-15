@@ -49,21 +49,23 @@ def test_trige_endpoint_returns_decision_and_expected_keys():
     assert decision["recommended_action"]["type"] == "create_ticket"
     assert decision["severity"] == "high"
 
-@patch('app.db.account_mongo.mongomock.MongoClient')
-def test_trige_endpoint_healthy_suggests_runbook(mock_mongo_cls):
+@patch('app.graph.langgraph_flow.MongoAccountDB')
+def test_trige_endpoint_healthy_suggests_runbook(mock_account_db_cls):
     # Create a shared mock client for this test
     shared_client = mongomock.MongoClient()
-    mock_mongo_cls.return_value = shared_client
-
-    # Seed the database using the shared client
-    # The app will also use this shared client when it instantiates MongoAccountDB
-    seed_db = MongoAccountDB()
-    seed_db.upsert_account({
+    
+    # Create a REAL database instance using the shared client
+    # This ensures it behaves exactly like the real class (returning dicts, not Mocks)
+    seeded_db = MongoAccountDB(client=shared_client)
+    seeded_db.upsert_account({
         "user_id": HEALTHY_PAYLOAD["user_id"],
         "subscription": "active",
         "last_payment_attempt": "2025-12-10",
         "metadata": {}
     })
+    
+    # Configure the mock class to return our seeded instance when instantiated
+    mock_account_db_cls.return_value = seeded_db
     
     # Run the request
     r = client.post("/support/triage", json=HEALTHY_PAYLOAD)

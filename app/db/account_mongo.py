@@ -12,7 +12,6 @@ class MongoAccountDB:
         self.uri = uri or os.getenv("MONGO_URI")
         self.db_name = db_name or os.getenv("MONGO_DB", "SupportOPS")
 
-
         if self.uri:
             client = MongoClient(self.uri, tlsCAFile=certifi.where())
         else:

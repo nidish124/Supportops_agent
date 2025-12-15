@@ -10,16 +10,18 @@ import certifi
 
 load_dotenv()
 class MongoAuditDB:
-    def __init__(self, uri: Optional[str] = None, db_name: Optional[str] = None):
+    def __init__(self, uri: Optional[str] = None, db_name: Optional[str] = None, client: Optional[Any] = None):
         self.uri = uri or os.getenv("MONGO_URI")
         self.db_name = db_name or os.getenv("MONGO_DB", "supportops")
 
-        if self.uri:
-            client = MongoClient(self.uri, tlsCAFile=certifi.where())
+        if client:
+            self.client = client
+        elif self.uri:
+            self.client = MongoClient(self.uri, tlsCAFile=certifi.where())
         else:
-            client = mongomock.MongoClient()
+            self.client = mongomock.MongoClient()
 
-        self.db = client[self.db_name]
+        self.db = self.client[self.db_name]
         self.collection = self.db["audit"]
 
     def create_audit(self, request_id: str, user_id: str, action_type: str, 
