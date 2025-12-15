@@ -23,7 +23,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install deps
         run: |
@@ -50,32 +50,19 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: Dockerfile.prod
+          file: Dockerfile
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:latest
 
-  deploy_cloud_run:
+  deploy_render:
     needs: build_and_push
-    if: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY != '' }}
     runs-on: ubuntu-latest
-
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Write GCP key
-        run: echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > gcloud-key.json
-
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          service_account_key: gcloud-key.json
-          project_id: ${{ secrets.GCP_PROJECT }}
-
-      - name: Deploy to Cloud Run
+      - name: Deploy to Render
         run: |
-          gcloud run deploy ${{ secrets.CLOUD_RUN_SERVICE }} \
-            --image=${{ env.IMAGE_NAME }}:${{ github.sha }} \
-            --region=${{ secrets.GCP_REGION }} \
-            --platform=managed \
-            --allow-unauthenticated \
-            --update-env-vars=GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }},GITHUB_REPO=${{ secrets.GITHUB_REPO }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          # Trigger the Render Deploy Hook
+          # Requires RENDER_DEPLOY_HOOK in GitHub Secrets
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
