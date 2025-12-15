@@ -8,7 +8,7 @@ load_dotenv()
 import certifi
 
 class MongoAccountDB:
-    def __init__(self, uri: Optional[str]=None, db_name: Optional[str]=None):
+    def __init__(self, uri: Optional[str]=None, db_name: Optional[str]=None, client: Optional[Any] = None):
         self.uri = uri or os.getenv("MONGO_URI")
         self.db_name = db_name or os.getenv("MONGO_DB", "SupportOPS")
 
