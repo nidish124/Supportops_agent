@@ -5,15 +5,16 @@ import mongomock
 from dotenv import load_dotenv
 
 load_dotenv()
-
+import certifi
 
 class MongoAccountDB:
     def __init__(self, uri: Optional[str]=None, db_name: Optional[str]=None):
         self.uri = uri or os.getenv("MONGO_URI")
         self.db_name = db_name or os.getenv("MONGO_DB", "SupportOPS")
 
+
         if self.uri:
-            client = MongoClient(self.uri)
+            client = MongoClient(self.uri, tlsCAFile=certifi.where())
         else:
             client = mongomock.MongoClient()
 

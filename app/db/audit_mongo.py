@@ -5,6 +5,8 @@ from bson.objectid import ObjectId
 import mongomock
 from datetime import datetime, UTC
 from dotenv import load_dotenv
+import certifi
+
 
 load_dotenv()
 class MongoAuditDB:
@@ -13,7 +15,7 @@ class MongoAuditDB:
         self.db_name = db_name or os.getenv("MONGO_DB", "supportops")
 
         if self.uri:
-            client = MongoClient(self.uri)
+            client = MongoClient(self.uri, tlsCAFile=certifi.where())
         else:
             client = mongomock.MongoClient()
 
