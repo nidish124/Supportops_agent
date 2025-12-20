@@ -24,9 +24,19 @@ class MongoAccountDB:
         return self.collection.find_one({"user_id": user_id}, {"_id": 0})
 
     def upsert_account(self, account: Dict[str, Any]):
+        # Ensure required fields are present with defaults if missing
+        update_data = {
+            "user_id": account["user_id"],
+            "subscription": account.get("subscription", "free"),
+            "last_payment_attempt": account.get("last_payment_attempt", None),
+            "metadata": account.get("metadata", {}),
+            # Preserve other fields if passed
+            **{k: v for k, v in account.items() if k not in ["user_id", "subscription", "last_payment_attempt", "metadata"]}
+        }
+        
         self.collection.update_one(
             {"user_id": account["user_id"]},
-            {"$set": account},
+            {"$set": update_data},
             upsert=True
         )
         

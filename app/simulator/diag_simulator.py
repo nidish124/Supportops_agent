@@ -19,6 +19,7 @@ class ProductDiagSimulator:
         now = datetime.now(UTC).isoformat()
         pv = (product_version or "").lower()
 
+
         if "1.6" in pv:
             return {
                 "timestamp": now,

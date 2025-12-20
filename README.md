@@ -88,12 +88,26 @@ uvicorn app.main:app --reload
 The API will be available at `http://localhost:8000`.
 Explore the interactive API docs at `http://localhost:8000/docs`.
 
+
 **Using Docker:**
 
 ```bash
 docker build -t supportops-agent .
 docker run -p 8000:8000 --env-file .env supportops-agent
 ```
+
+### 🖥️ Running the Frontend
+
+Navigate to the `frontend` directory and start the development server:
+
+```bash
+cd frontend
+npm install  # First time only
+npm run dev
+```
+
+The frontend will be available at `http://localhost:5173`.
+It is configured to proxy API requests to `http://localhost:8000`. Ensure the backend is running.
 
 ## 🧪 Testing
 

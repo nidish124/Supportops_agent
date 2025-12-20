@@ -33,10 +33,10 @@ class IntentClassifierNode:
         self.llm = llm or Mockllm()
         self.template = PromptTemplate(template or 
         "You are a support triage assistant. "
-        "Return a JSON object with keys: intent, severity, confidence, explanation.\n\n"
+        "Return a JSON object with keys: intent, severity, confidence, explanation, issues.\n\n"
         "Customer message: \"{text}\"\n"
         "Account metadata: {metadata}\n\n"
-        "Rules: If message mentions payment/billing terms, intent=billing_issue.")
+        "Rules: If message mentions payment/billing terms, intent=billing_issue, issues= Yes/No.")
 
 
     def classify(self, triage_request: triageRequest) -> Dict[str, Any]:
@@ -44,21 +44,20 @@ class IntentClassifierNode:
         prompt = self.template.format(text = triage_request.message, metadata = json.dumps(metadata_var))
 
         raw = self.llm.predict(prompt)
-
         try:
             parsed = json.loads(raw)
-
-        except Exception:
-            parsed = {"intent": "general_query", "severity": "low", "confidence": 0.0, "explanation": "llm_parse_error"}
-
+        except Exception as e:
+            print(f"Error decoding JSON: {e}")
+            parsed = {"intent": "general_query", "severity": "low", "confidence": 0.0, "explanation": "llm_parse_error", "issues": "No"}
         intent = parsed.get("intent", "general_query")
         severity = parsed.get("severity", "low")
         confidence = float(parsed.get("confidence", 0.0))
         explanation = parsed.get("explanation", "")
-
+        issues = parsed.get("issues", "")
         return {
             "intent": intent,
             "severity": severity,
             "confidence": confidence,
-            "explanation": explanation
+            "explanation": explanation,
+            "issues": issues
         }

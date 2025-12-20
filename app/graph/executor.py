@@ -43,6 +43,7 @@ class ActionExecutorNode:
         action_type = recommended_action.get("type")
         payload = recommended_action.get("action_payload", {})
 
+
         if action_type == "create_ticket":
             title = recommended_action.get("summary") or "Support ticket"
             body = recommended_action.get("body") or ""
@@ -50,6 +51,7 @@ class ActionExecutorNode:
 
             try:
                 external = self.tickettool.create_issue(title, body, lables)
+
             except Exception as exc:
                 self.audit_db.update_status(audit_id, "rejected")
                 audit_row = self.audit_db.get_audit(audit_id)

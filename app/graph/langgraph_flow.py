@@ -32,12 +32,35 @@ from app.llm.mock_llm import Mockllm
 # Executor
 from app.graph.executor import ActionExecutorNode
 from app.graph.safety import SafetyGateNode
-
+from app.logging_utils import configure_logging
 from langgraph.graph import StateGraph
 from langgraph.constants import START, END
 from dotenv import load_dotenv
+from openai import OpenAI
 
+configure_logging()
 load_dotenv()
+
+class OpenAILLM:
+    def __init__(self, api_key: str, model: str = "gpt-4o-mini", json_mode: bool = False):
+        self.client = OpenAI(api_key=api_key)
+        self.model = model
+        self.json_mode = json_mode
+
+    def predict(self, prompt: str) -> str:
+        kwargs = {}
+        if self.json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "user", "content": prompt},
+                
+            ],
+            **kwargs
+        )
+        return response.choices[0].message.content or ""
 
 class TriageState(TypedDict, total=False):
     payload: Dict[str, Any]
@@ -65,29 +88,40 @@ class LangGraphTriage:
             try:
                 self.ticket_tool = GitHubTicketTool(github_token, github_repo)
             except Exception as e:
+                print(f"local ticket raised because {e}")
                 self.ticket_tool = LocalTicketTool()
-
         else:
+            print(f"GITHUB token not found")
             self.ticket_tool = LocalTicketTool()
+
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        # Determine synthesis LLM: Prefer OpenAI if key exists, else MockLLM, unless injected.
+        if synthesis_llm:
+            self.synthesis_llm = synthesis_llm
+        else:
+            if api_key:
+                # DecisionNode needs text output, not forced JSON
+                self.synthesis_llm = OpenAILLM(api_key, json_mode=False)
+            else:
+                self.synthesis_llm = Mockllm()
 
         ##LLM Adapters:
         if classifier_llm:
             self.classifier_llm = classifier_llm
         else:
-            self.classifier_llm = Mockllm()
-
-        if synthesis_llm:
-            self.synthesis_llm = synthesis_llm
-        else:
-            self.synthesis_llm = Mockllm()
+            if api_key:
+                # IntentClassifierNode expects JSON output
+                self.classifier_llm = OpenAILLM(api_key, json_mode=True)
+            else:
+                self.classifier_llm = Mockllm()
 
         self.parser_node_impl = ParseInputNode()
 
         self.classifier_node_impl = IntentClassifierNode(llm=self.classifier_llm)
         self.orch_impl = DiagnosticsOrchestratorNode(self.combined)
-        self.decision_impl = DecisionNode()
 
-        setattr(self.decision_impl, "synthesis_llm", self.synthesis_llm)
+        self.decision_impl = DecisionNode(synthesis_llm=self.synthesis_llm)
 
         self.safety_impl = SafetyGateNode(audit_db=self.audit_db, secret="lg-secret", authorized_approvers=["human_approver"])
         self.executor_impl = ActionExecutorNode(audit_db=self.audit_db, ticket_tool=self.ticket_tool)
@@ -114,7 +148,8 @@ class LangGraphTriage:
 
     def node_decision(self, state: TriageState) -> TriageState:
         diag = state["diagnostics"]
-        decision = self.decision_impl.decide(diag)
+        classify = state["classification"]
+        decision = self.decision_impl.decide(diag, classify)
         return {"decision": decision}
 
     def node_safety(self, state: TriageState) -> TriageState:
@@ -180,6 +215,7 @@ class LangGraphTriage:
 
         try:
             acc = res.get("diagnostics", {}).get("account_status")
+
             if acc:
                 self.account_db.upsert_account({
                     "user_id": acc.get("user_id"),

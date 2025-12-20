@@ -24,7 +24,7 @@ class ProductDiagTool:
     def __init__(self, simulator : ProductDiagSimulator):
         self.simulator = simulator
 
-    def run(self, user_id: str, product_version: str) -> Dict[str, Any]:
+    def run(self, user_id: str, product_version: str, message: str = None) -> Dict[str, Any]:
         return self.simulator.run_diagnostic(user_id, product_version)
 
 class CombinedDiagnosticsTool:

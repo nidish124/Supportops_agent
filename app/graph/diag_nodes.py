@@ -48,14 +48,17 @@ class DecisionNode:
         self.synthesis_llm = synthesis_llm or Mockllm()
 
 
-    def decide(self, diagnostics: Dict[str, Any]) -> Dict[str, Any]:
+    def decide(self, diagnostics: Dict[str, Any], classify: Dict[str, Any]) -> Dict[str, Any]:
         acc = diagnostics.get("account_state") or {}
         product = diagnostics.get("product_diagnostics") or {}
+        confidence = classify.get("confidence") or 0.0
+        explanation = classify.get("explanation", "")
+        issues = str(classify.get("issues", "")).lower()
 
         payment_status = (product.get("payment_gateway_status") or "").lower()
         service_health = (product.get("service_health") or "").lower()
         subscription = acc.get("subscription")
-
+        
         recommended_action = {
             "type": "suggest_runbook",
             "summary": "No immediate issue detected",
@@ -108,6 +111,18 @@ class DecisionNode:
             severity = "medium"
             safety["action_allowed"] = False
             safety["audit_hint"] = "runbook_suggestion"
+            
+        elif confidence > 0.70 and issues == "yes":
+            recommended_action = {
+                "type": "create_ticket",
+                "summary": explanation or "Issue detected by classifier",
+                "body": f"Auto-generated ticket. Classifier detected issue with high confidence ({confidence}).",
+                "action_payload": {}
+            }
+            runbook_id = "User_issues_v1"
+            severity = "low"
+            safety["action_allowed"] = True
+            safety["audit_hint"] = "Issues booked"
 
         else:
             recommended_action = {

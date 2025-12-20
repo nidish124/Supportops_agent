@@ -15,7 +15,7 @@ def test_decisionnode_generates_justification_and_runbook_summary():
         }
     }
 
-    out = node.decide(diagnostics)
+    out = node.decide(diagnostics, {})
     assert "justification" in out
     assert isinstance(out["justification"], str)
 

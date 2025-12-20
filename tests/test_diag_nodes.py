@@ -34,7 +34,7 @@ def test_decision_node_payment_timeout_creates_ticket():
     diag = orch.run("nidish", "1.6.0")
 
     decision = DecisionNode(llm = Mockllm())
-    out = decision.decide(diag)
+    out = decision.decide(diag, {})
 
     assert out["recommended_action"]["type"] == "create_ticket"
     assert out["runbook_id"] == "payment_retry_flow_v1"
@@ -49,7 +49,7 @@ def test_decision_node_missing_subscription_collects_info():
     diag = orch.run("nidish", "1.2.0")
 
     decision = DecisionNode(llm = Mockllm())
-    out = decision.decide(diag)
+    out = decision.decide(diag, {})
 
     assert out["recommended_action"]["type"] == "collect_account_info"
     assert out["runbook_id"] == "collect_account_info_v1"
@@ -63,9 +63,30 @@ def test_decision_node_degraded_service_suggest_runbook():
     diag = orch.run("nidish", "beta-1.2")
 
     decision = DecisionNode(llm = Mockllm())
-    out = decision.decide(diag)
+    out = decision.decide(diag, {})
 
     assert out["recommended_action"]["type"] == "suggest_runbook"
     assert out["runbook_id"] == "degraded_service_v1"
     assert out["severity"] == "medium"
+    db.close()
+
+def test_decision_node_high_confidence_issue_creates_ticket():
+    combined, db = make_combined_tool_with_account(user_id="nidish", subscription="active", product_version="1.6.0")
+    orch = DiagnosticsOrchestratorNode(combined)
+    diag = orch.run("nidish", "1.6.0")
+
+    # Mock classification with high confidence and issues=yes
+    classification = {
+        "confidence": 0.95,
+        "issues": "Yes",
+        "explanation": "Predicted critical issue"
+    }
+
+    decision = DecisionNode(llm = Mockllm())
+    out = decision.decide(diag, classification)
+
+    assert out["recommended_action"]["type"] == "create_ticket"
+    assert out["recommended_action"]["summary"] == "Predicted critical issue"
+    assert out["runbook_id"] == "User_issues_v1"
+    assert out["safety"]["action_allowed"] == True
     db.close()

@@ -8,7 +8,7 @@ tt.ipynb
 debug_paths.py
 *.ipynb
 other/
-
+scripts/
 # Distribution / packaging
 .Python
 build/
