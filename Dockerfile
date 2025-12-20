@@ -17,12 +17,27 @@ RUN uv sync --frozen --no-dev
 
 COPY . .
 
+# 2. Frontend Build Stage
+FROM node:18-slim AS frontend-builder
+WORKDIR /app/frontend
+# Copy frontend package files
+COPY frontend/package*.json ./
+RUN npm ci
+# Copy source
+COPY frontend/ .
+# Build
+RUN npm run build
+
+# 3. Runtime Stage
 FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
 # Copy the entire app directory (which includes the .venv created by uv inside /app)
 COPY --from=builder /app /app
+
+# Copy built frontend assets
+COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
 
 # Activate venv
 ENV VIRTUAL_ENV=/app/.venv
