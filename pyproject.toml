@@ -23,3 +23,7 @@ dependencies = [
     "pydevd-pycharm>=253.29346.142",
     "aiofiles>=24.1.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["frontend*", "tests*"]
