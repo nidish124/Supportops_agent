@@ -28,7 +28,6 @@ from app.tools.ticket_tool import Tickettool as LocalTicketTool
 
 # LLMs and adapters
 from app.llm.mock_llm import Mockllm
-from app.llm.adapter import MockLLMAdapter, LangchainLLM  # LangChainLLM optional skeleton
 
 # Executor
 from app.graph.executor import ActionExecutorNode
@@ -50,7 +49,7 @@ class TriageState(TypedDict, total=False):
     execution: Dict[str, Any]
 
 class LangGraphTriage:
-    def __init__(self, db_path: str = None, github_token : Optional[str] = None, github_repo: Optional[str]= None,
+    def __init__(self, github_token : Optional[str] = None, github_repo: Optional[str]= None,
     classifier_llm: Optional[Any] = None, synthesis_llm: Optional[Any] = None):
         github_token = github_token or os.getenv("GITHUB_TOKEN")
         github_repo = github_repo or os.getenv("GITHUB_REPO")

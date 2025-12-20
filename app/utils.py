@@ -6,12 +6,6 @@ def get_db_path(filename: str, env_var: str = None) -> str:
     """
     Get a cross-platform compatible database path.
     
-    Args:
-        filename: The name of the database file (e.g., 'supportops_audit.db')
-        env_var: Optional environment variable name to check for a custom path
-    
-    Returns:
-        str: Absolute path to the database file
     """
     if env_var:
         custom_path = os.getenv(env_var)

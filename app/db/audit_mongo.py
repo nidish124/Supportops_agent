@@ -17,7 +17,7 @@ class MongoAuditDB:
         if client:
             self.client = client
         elif self.uri:
-            self.client = MongoClient(self.uri, tlsCAFile=certifi.where())
+            self.client = MongoClient(self.uri)
         else:
             self.client = mongomock.MongoClient()
 

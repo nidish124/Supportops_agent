@@ -13,7 +13,7 @@ class MongoAccountDB:
         self.db_name = db_name or os.getenv("MONGO_DB", "SupportOPS")
 
         if self.uri:
-            client = MongoClient(self.uri, tlsCAFile=certifi.where())
+            client = MongoClient(self.uri)
         else:
             client = mongomock.MongoClient()
 
