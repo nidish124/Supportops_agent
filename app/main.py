@@ -19,9 +19,11 @@ logger = logging.getLogger("request")
 
 app = FastAPI(title="supportops agent", version="0.1.0")
 
-@app.get("/")
-def read_root():
-    return Response(status_code=302, headers={"Location": "/docs"})
+
+
+# @app.get("/")
+# def read_root():
+#     return Response(status_code=302, headers={"Location": "/docs"})
 
 logger = logging.getLogger("supportops")
 
